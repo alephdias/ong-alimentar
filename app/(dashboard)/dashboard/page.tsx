@@ -1,7 +1,7 @@
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+export const dynamic = 'force-dynamic'
+
 import { supabaseAdmin } from '@/lib/supabase'
-import { Utensils, Users, MapPin, Package, TrendingUp, AlertTriangle } from 'lucide-react'
+import { Utensils, Users, MapPin, Package, AlertTriangle } from 'lucide-react'
 import type { Distribuicao, EstoqueItem } from '@/types'
 
 async function getDashboardData() {
@@ -38,7 +38,6 @@ async function getDashboardData() {
 }
 
 export default async function DashboardPage() {
-  const session = await getServerSession(authOptions)
   const data = await getDashboardData()
 
   const stats = [
@@ -57,17 +56,13 @@ export default async function DashboardPage() {
 
   return (
     <div>
-      {/* Header */}
       <div className="mb-6">
-        <h1 className="text-xl font-semibold text-gray-900">
-          Olá, {session?.user?.name?.split(' ')[0]} 👋
-        </h1>
+        <h1 className="text-xl font-semibold text-gray-900">Dashboard</h1>
         <p className="text-sm text-gray-500 mt-0.5">
           {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
         </p>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {stats.map(({ label, value, icon: Icon, color }) => (
           <div key={label} className="card">
@@ -80,9 +75,7 @@ export default async function DashboardPage() {
         ))}
       </div>
 
-      {/* Content */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Últimas distribuições */}
         <div className="card">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-medium text-gray-900">Últimas distribuições</h2>
@@ -99,9 +92,7 @@ export default async function DashboardPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-900 truncate">{d.local}</p>
-                    <p className="text-xs text-gray-400">
-                      {new Date(d.data).toLocaleDateString('pt-BR')}
-                    </p>
+                    <p className="text-xs text-gray-400">{new Date(d.data).toLocaleDateString('pt-BR')}</p>
                   </div>
                   <span className="text-sm font-medium text-brand-600 flex-shrink-0">
                     {d.refeicoes_servidas} refeições
@@ -112,7 +103,6 @@ export default async function DashboardPage() {
           )}
         </div>
 
-        {/* Estoque */}
         <div className="card">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-medium text-gray-900">Status do estoque</h2>
@@ -133,12 +123,8 @@ export default async function DashboardPage() {
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-sm text-gray-700">{item.item}</span>
                       <div className="flex items-center gap-2">
-                        <span className="text-sm text-gray-500">
-                          {item.quantidade} {item.unidade ?? ''}
-                        </span>
-                        <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${badgeClass}`}>
-                          {badgeLabel}
-                        </span>
+                        <span className="text-sm text-gray-500">{item.quantidade} {item.unidade ?? ''}</span>
+                        <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${badgeClass}`}>{badgeLabel}</span>
                       </div>
                     </div>
                     <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
