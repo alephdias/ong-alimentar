@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { Heart, Mail, Lock, Eye, EyeOff, ArrowRight, Github } from 'lucide-react'
 import Link from 'next/link'
@@ -24,11 +24,18 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
 
+  useEffect(() => {
+    const hash = window.location.hash
+    if (hash && hash.includes('access_token')) {
+      window.location.href = '/dashboard'
+    }
+  }, [])
+
   function getRedirectTo() {
     return `${window.location.origin}/api/auth/callback`
   }
 
-  async function handleOAuth(provider: 'google' | 'github' | 'azure') {
+  async function handleOAuth(provider: 'google' | 'github') {
     setOauthLoading(provider)
     setError('')
     const supabase = getSupabase()
@@ -83,23 +90,10 @@ export default function LoginPage() {
       label: 'GitHub',
       icon: <Github className="w-5 h-5" />,
     },
-    {
-      id: 'azure' as const,
-      label: 'Microsoft',
-      icon: (
-        <svg className="w-5 h-5" viewBox="0 0 24 24">
-          <path fill="#f25022" d="M1 1h10v10H1z"/>
-          <path fill="#00a4ef" d="M13 1h10v10H13z"/>
-          <path fill="#7fba00" d="M1 13h10v10H1z"/>
-          <path fill="#ffb900" d="M13 13h10v10H13z"/>
-        </svg>
-      ),
-    },
   ]
 
   return (
     <div className="min-h-screen flex">
-      {/* Lado esquerdo visual */}
       <div className="hidden lg:flex lg:w-1/2 bg-gray-950 flex-col justify-between p-12 relative overflow-hidden">
         <div style={{ position:'absolute',top:-80,right:-80,width:320,height:320,borderRadius:'50%',background:'rgba(29,158,117,0.12)',filter:'blur(40px)' }} />
         <div style={{ position:'absolute',bottom:-60,left:-60,width:240,height:240,borderRadius:'50%',background:'rgba(29,158,117,0.08)',filter:'blur(30px)' }} />
@@ -135,7 +129,6 @@ export default function LoginPage() {
         </p>
       </div>
 
-      {/* Lado direito formulário */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-white">
         <div className="w-full max-w-sm">
           <div className="flex items-center gap-3 mb-8 lg:hidden">
