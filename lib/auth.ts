@@ -1,6 +1,6 @@
 import NextAuth, { NextAuthOptions } from 'next-auth'
 import GoogleProvider from 'next-auth/providers/google'
-import { SupabaseAdapter } from '@auth/supabase-adapter'
+import { supabaseAdmin } from './supabase'
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -9,18 +9,13 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
   ],
-  adapter: SupabaseAdapter({
-    url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    secret: process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  }),
+  session: { strategy: 'jwt' },
   pages: {
     signIn: '/login',
     error: '/login',
   },
   callbacks: {
     async signIn({ user }) {
-      // Só permite login se o email estiver cadastrado como voluntário
-      const { supabaseAdmin } = await import('./supabase')
       const db = supabaseAdmin()
       const { data } = await db
         .from('voluntarios')
@@ -29,10 +24,8 @@ export const authOptions: NextAuthOptions = {
         .single()
       return !!data
     },
-    async session({ session, user }) {
-      // Adiciona role e id do voluntário à sessão
+    async session({ session, token }) {
       if (session.user) {
-        const { supabaseAdmin } = await import('./supabase')
         const db = supabaseAdmin()
         const { data } = await db
           .from('voluntarios')
@@ -47,7 +40,6 @@ export const authOptions: NextAuthOptions = {
       return session
     },
   },
-  session: { strategy: 'database' },
 }
 
 export default NextAuth(authOptions)
